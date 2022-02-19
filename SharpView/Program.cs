@@ -4,10 +4,12 @@ using SharpView.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SharpView
@@ -18,8 +20,10 @@ namespace SharpView
         {
             if (args.Length == 0)
             {
-                Logger.Write_Output("Ex: SharpView.exe Method-Name -Switch -String domain -Array domain,user -Enum ResetPassword -IntEnum CREATED_BY_SYSTEM,APP_BASIC -PointEnum ResetPassword,All -Credential admin@domain.local/password");
-                Logger.Write_Output("Execute 'Sharpview.exe <Method-Name> -Help' to get arguments list and expected types");
+                Logger.Write_Output("Usage:");
+                Logger.Write_Output("SharpView.exe -o csv/txt/console Method-Name -Switch -String domain -Array domain,user -Enum ResetPassword -IntEnum CREATED_BY_SYSTEM,APP_BASIC -PointEnum ResetPassword,All -Credential admin@domain.local/password");
+                Logger.Write_Output("");
+                Logger.Write_Output("Execute 'Sharpview.exe -o console <Method-Name> -Help' to get arguments list and expected types");
                 return;
             }
             try
@@ -34,7 +38,23 @@ namespace SharpView
 
         static void Run(string[] args)
         {
-            var methodName = args[0];
+            var outputmethod = args[0].ToLower();
+            var outputype = args[1].ToLower();
+            if (outputmethod != "-o") {
+                Console.WriteLine("No Valid Output method entered, please use -o to set the output method");
+                Environment.Exit(0);
+            }
+            else
+            {
+                if(outputype != "csv" && outputype != "console" && outputype != "txt")
+                {
+                    Console.WriteLine(outputype);
+                    Console.WriteLine("No Valid Output type entered, please enter csv/console/txt");
+                    Environment.Exit(0);
+                }
+            }
+
+            var methodName = args[2];
             switch (methodName.ToLower())
             {
                 case "get-domaingpouserlocalgroupmapping":
@@ -492,7 +512,38 @@ namespace SharpView
             }
             // Leaving out try catch block to see errors for now
             var ret = method.Invoke(null, new[] { argObject });
-            ObjectDumper.Write(ret);
+            // debug function
+            // Console.WriteLine(ObjectDumper.ToDetails(ret));
+
+            // output to console or txt file or csv
+            // output file to create a file in current directory
+            if(outputype == "console")
+            {
+                ObjectDumper.Write(ret, false, null);
+            }
+            else if(outputype == "txt")
+            {
+                var filename = DateTime.Now.Ticks;
+                ObjectDumper.Write(ret, true, $@".\output_{filename}.txt");
+                var standardOutput = new StreamWriter(Console.OpenStandardOutput());
+                standardOutput.AutoFlush = true;
+                Console.SetOut(standardOutput);
+                Console.WriteLine($@"[+] Output File: .\output_{filename}.txt");
+            }
+            else if (outputype == "csv")
+            {
+                // here is trying to use the original export csv function, but nested object is needed to fix
+                // ToFix
+                var filename = DateTime.Now.Ticks;
+                PowerView.Export_PowerViewCSV(new Arguments.Args_Export_PowerViewCSV()
+                {
+                    InputObject = ret,
+                    Path = $@".\output_{DateTime.Now.Ticks}.csv"
+                });
+                Console.WriteLine($@"[+] Output File: .\output_{filename}.csv");
+            }
+            Console.WriteLine("===== SharpView Completed =====");
+
         }
 
         static string GetMethodHelp(MethodInfo method)

@@ -11,7 +11,7 @@ namespace SharpView.Arguments
 {
     public class Args_Export_PowerViewCSV
     {
-        public object[] InputObject { get; set; }
+        public object InputObject { get; set; }
 
         public string Path { get; set; }
 

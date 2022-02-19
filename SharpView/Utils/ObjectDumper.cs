@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 
@@ -7,12 +8,13 @@ namespace SharpView.Utils
 {
     public class ObjectDumper
     {
-        TextWriter writer;
+        TextWriter writer = Console.Out;
+        StreamWriter swriter;
         int pos;
         int level;
         int depth;
 
-        /*public static string ToDetails(this object obj)
+        public static string ToDetails(object obj)
         {
             var details = obj.ToString();
             foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(obj))
@@ -22,23 +24,33 @@ namespace SharpView.Utils
                 details += $@"{Environment.NewLine}{name} : {value}";
             }
             return details;
-        }*/
-
-        public static void Write(object o)
-        {
-            Write(o, 0);
         }
 
-        public static void Write(object o, int depth)
+        public static void Write(object o, bool outfile, string outfilepath)
         {
-            ObjectDumper dumper = new ObjectDumper(depth);
+            Write(o, 0, outfile, outfilepath);
+        }
+
+        public static void Write(object o, int depth, bool outfile, string outfilepath)
+        {
+            ObjectDumper dumper = new ObjectDumper(depth, outfile, outfilepath);
             dumper.WriteObject(null, o);
         }
 
-        private ObjectDumper(int depth)
+        private ObjectDumper(int depth, bool outfile, string outfilepath)
         {
+            if (outfile)
+            {
+                swriter = new StreamWriter(outfilepath);
+                swriter.AutoFlush = true;
+                Console.SetOut(swriter);
+            }
             this.writer = Console.Out;
             this.depth = depth;
+            if (outfile)
+            {
+                Console.SetOut(writer);
+            }
         }
 
         private void Write(string s)

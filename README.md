@@ -3,12 +3,15 @@
 
 #### Usage:
 ```
-C:\>SharpView.exe Get-DomainController -Domain test.local -Server dc.test.local -Credential admin@test.local/password  
+C:\>SharpView.exe -o console/txt/csv Get-DomainController -Domain test.local -Server dc.test.local -Credential admin@test.local/password  
 ```
 ```
-C:\>SharpView.exe Get-DomainController -Help
-Get-DomainController -Domain <String> -Server <String> -DomainController <String> -LDAP <Boolean> -Credential <NetworkCredential>
+Example:
+C:\>SharpView.exe -o console Get-DomainController -Help
+Get-DomainController -o console -Domain <String> -Server <String> -DomainController <String> -LDAP <Boolean> -Credential <NetworkCredential>
 ```
+### ToFix
+1. export csv problem (txt to csv -> Sharpviewtxt2csv.py)
 
 #### Available methods
 ```
