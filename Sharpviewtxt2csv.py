@@ -16,9 +16,9 @@ def main(argv):
 
     csv_dict_array = []
     csv_dict = {}
-    with open(sourcetxtpath) as f:
+    with open(sourcetxtpath, encoding="UTF-8") as f:
             for line in f:
-                print(line.strip())
+                # print(line.strip())
                 if line not in ['\n', '\r\n']:
                     key, value = line.replace(" ", "").replace("\n", "").split(":", 1)
                     # print(key, value)
@@ -46,7 +46,7 @@ def main(argv):
     # print(csv_dict_array)
     
     # output csv
-    with open(outputcsvpath, "w", newline="\n") as wf:
+    with open(outputcsvpath, "w", newline="\n", encoding="UTF-8") as wf:
         wdwrter = csv.DictWriter(wf, csv_dict_array[0].keys())
         wdwrter.writeheader()
         wdwrter.writerows(csv_dict_array)
